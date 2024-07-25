@@ -68,9 +68,6 @@ impl Chunk {
             OpCode::Divide => return self.simple_instruction("Divide"),
             OpCode::Negate => return self.simple_instruction("Negate"),
             OpCode::Return => return self.simple_instruction("Return"),
-            _ => {
-                println!("Unknown opcode {:#?}\n", instruction);
-            }
         }
     }
 

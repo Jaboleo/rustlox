@@ -1,4 +1,5 @@
-use chunk::{Chunk, OpCode, Value};
+use crate::chunk::{Chunk, OpCode, Value};
+use crate::compiler::compile;
 
 pub enum InterpretResult {
     Ok,
@@ -10,7 +11,7 @@ pub struct VM {
     chunk: Chunk,
     ip: usize,
     stack: [Value; 256],
-    stack_top: usize
+    stack_top: usize,
 }
 
 impl VM {
@@ -18,15 +19,14 @@ impl VM {
         Self {
             chunk: Chunk::new(),
             ip: 0,
-            stack: [0.0 ;256],
-            stack_top: 0
+            stack: [0.0; 256],
+            stack_top: 0,
         }
     }
 
-    pub fn interpret(&mut self, chunk: Chunk) -> InterpretResult {
-        self.chunk = chunk;
-        self.ip = 0;
-        self.run()
+    pub fn interpret(&mut self, source: String) -> InterpretResult {
+        compile(source);
+        return InterpretResult::Ok;
     }
 
     fn run(&mut self) -> InterpretResult {
@@ -38,7 +38,7 @@ impl VM {
                 OpCode::Constant(value_index) => {
                     let constant = self.chunk.constants.values[*value_index];
                     self.push(constant);
-                },
+                }
                 OpCode::Add => {
                     let b = self.pop();
                     let a = self.pop();
@@ -48,43 +48,41 @@ impl VM {
                     let b = self.pop();
                     let a = self.pop();
                     self.push(a - b)
-                },
+                }
                 OpCode::Multiply => {
                     let b = self.pop();
                     let a = self.pop();
                     self.push(a * b)
-                },
+                }
                 OpCode::Divide => {
                     let b = self.pop();
                     let a = self.pop();
                     self.push(a / b)
-                },
+                }
                 OpCode::Negate => {
                     let negated = -self.pop();
                     self.push(negated);
-                },
+                }
                 OpCode::Return => {
                     println!("{}", self.pop());
-                    return InterpretResult::Ok
-                },
-                _ => println!("Unknown opcode"),
+                    return InterpretResult::Ok;
+                }
             }
         }
         InterpretResult::RuntimeError
     }
 
-    fn reset_stack(&mut self){
+    fn reset_stack(&mut self) {
         self.stack_top = 0;
     }
 
-    fn push(&mut self, value: Value){
+    fn push(&mut self, value: Value) {
         self.stack[self.stack_top] = value;
         self.stack_top += 1;
     }
 
-    fn pop(&mut self) -> Value{
+    fn pop(&mut self) -> Value {
         self.stack_top -= 1;
         self.stack[self.stack_top]
     }
-
 }
